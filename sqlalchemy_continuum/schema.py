@@ -116,20 +116,19 @@ def get_property_mod_flags_query(
                 getattr(v2.c, tx_column_name).is_(None)
             )).label(column + mod_suffix)
             for column in tracked_columns
-        ],
-        from_obj=v1.outerjoin(
-            v2,
-            sa.and_(
-                getattr(v2.c, end_tx_column_name) ==
-                getattr(v1.c, tx_column_name),
-                *[
-                    getattr(v2.c, pk) == getattr(v1.c, pk)
-                    for pk in primary_keys
-                    if pk != tx_column_name
-                ]
-            )
+        ]
+    ).select_from(v1.outerjoin(
+        v2,
+        sa.and_(
+            getattr(v2.c, end_tx_column_name) ==
+            getattr(v1.c, tx_column_name),
+            *[
+                getattr(v2.c, pk) == getattr(v1.c, pk)
+                for pk in primary_keys
+                if pk != tx_column_name
+            ]
         )
-    ).order_by(getattr(v1.c, tx_column_name))
+    )).order_by(getattr(v1.c, tx_column_name))
 
 
 def update_property_mod_flags(
